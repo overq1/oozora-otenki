@@ -73,8 +73,9 @@ function getWeather() {
                     msg += "最低気温は" + min_temperature + "度です";
                 }
         
-                console.log(msg);
             })
+
+            console.log(msg);
             return msg;
         })
     );
