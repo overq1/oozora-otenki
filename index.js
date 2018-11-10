@@ -72,11 +72,9 @@ function getWeather() {
                     msg += "最高気温は" + max_temperature + "度で";
                     msg += "最低気温は" + min_temperature + "度です";
                 }
-        
+                console.log(msg);
+                return msg;
             })
-
-            console.log(msg);
-            return msg;
         })
     );
 }
