@@ -39,7 +39,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
             if (event.message.text == "hello"){
                 // http request
                 events_processed.push(http.get(url, (weather_res) => {
-                    console.log("request");
                     var body = '';
                     weather_res.setEncoding('utf8');
                     weather_res.on('data', (chunk) => {
@@ -68,7 +67,7 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                // replyMessage()で返信し、そのプロミスをevents_processedに追加。
               events_processed.push(bot.replyMessage(event.replyToken, {
                 type: "text",
-                text: msg
+                text: "hello"
               }));
             }
         }
