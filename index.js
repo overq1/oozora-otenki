@@ -13,6 +13,7 @@ const line_config = {
 };
 
 const url = 'http://weather.livedoor.com/forecast/webservice/json/v1?city=130010';
+var msg = '';
 
 // -----------------------------------------------------------------------------
 // Webサーバー設定
@@ -36,7 +37,7 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
         if (event.type == "message" && event.message.type == "text"){
             // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。
             if (event.message.text == "hello"){
-               getWeather().then(function(msg) {
+               getWeather().then(function() {
                    bot.replyMessage(event.replyToken, {
                        type: "text",
                        text: msg,
@@ -51,7 +52,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
 function getWeather() {
     return new Promise((resolve, reject) => 
         http.get(url, (weather_res) => {
-            var msg =  '';
             var body = '';
             weather_res.setEncoding('utf8');
             weather_res.on('data', (chunk) => {
@@ -72,9 +72,9 @@ function getWeather() {
                     msg += "最高気温は" + max_temperature + "度で";
                     msg += "最低気温は" + min_temperature + "度です";
                 }
-                console.log(msg);
-                return msg;
             })
+            console.log(msg);
+            //return msg;
         })
     );
 }
