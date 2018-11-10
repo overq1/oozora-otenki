@@ -13,7 +13,6 @@ const line_config = {
 };
 
 const url = 'http://weather.livedoor.com/forecast/webservice/json/v1?city=130010';
-var msg = '';
 
 // -----------------------------------------------------------------------------
 // Webサーバー設定
@@ -37,44 +36,77 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
         if (event.type == "message" && event.message.type == "text"){
             // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。
             if (event.message.text == "hello"){
-               getWeather().then(function() {
+               //getWeather().then(function() {
+               //    bot.replyMessage(event.replyToken, {
+               //        type: "text",
+               //        text: msg,
+               //    })
+               //});
+               getWeather(function(msg) {
                    bot.replyMessage(event.replyToken, {
                        type: "text",
                        text: msg,
                    })
                });
-
             }
         }
     });
 });
 
-function getWeather() {
-    return new Promise((resolve, reject) => 
-        http.get(url, (weather_res) => {
-            var body = '';
-            weather_res.setEncoding('utf8');
-            weather_res.on('data', (chunk) => {
-                body += chunk
-            });
-            weather_res.on('end', (weather_res) => {
-                weather_res = JSON.parse(body);
-                var city = weather_res.location.city;
-                var date = weather_res.forecasts[0].dateLabel;
-                var weather = weather_res.forecasts[0].telop
-                msg = city + "の" + date + 'のお天気は' + weather + 'です';
-        
-                // 気温もわかる場合
-                if (weather_res.forecasts[0].temperature.max) {
-                    max_temperature = weather_res.forecasts[0].temperature.max.celsius;
-                    min_temperature = weather_res.forecasts[0].temperature.min.celsius;
-                    msg += "\n";
-                    msg += "最高気温は" + max_temperature + "度で";
-                    msg += "最低気温は" + min_temperature + "度です";
-                }
-            })
-            console.log(msg);
-            //return msg;
-        })
-    );
+function getWeather(callback) {
+    http.get(url, (weather_res) => {
+       var body = '';
+       let msg = '';
+       weather_res.setEncoding('utf8');
+       weather_res.on('data', (chunk) => {
+           body += chunk
+       });
+       weather_res.on('end', (weather_res) => {
+           weather_res = JSON.parse(body);
+           var city = weather_res.location.city;
+           var date = weather_res.forecasts[0].dateLabel;
+           var weather = weather_res.forecasts[0].telop
+           msg = city + "の" + date + 'のお天気は' + weather + 'です';
+   
+           // 気温もわかる場合
+           if (weather_res.forecasts[0].temperature.max) {
+               max_temperature = weather_res.forecasts[0].temperature.max.celsius;
+               min_temperature = weather_res.forecasts[0].temperature.min.celsius;
+               msg += "\n";
+               msg += "最高気温は" + max_temperature + "度で";
+               msg += "最低気温は" + min_temperature + "度です";
+           }
+           callback(msg);
+       })
+    })
 }
+
+//function getWeather() {
+//    return new Promise((resolve, reject) => 
+//        http.get(url, (weather_res) => {
+//            var body = '';
+//            weather_res.setEncoding('utf8');
+//            weather_res.on('data', (chunk) => {
+//                body += chunk
+//            });
+//            weather_res.on('end', (weather_res) => {
+//                weather_res = JSON.parse(body);
+//                var city = weather_res.location.city;
+//                var date = weather_res.forecasts[0].dateLabel;
+//                var weather = weather_res.forecasts[0].telop
+//                msg = city + "の" + date + 'のお天気は' + weather + 'です';
+//        
+//                // 気温もわかる場合
+//                if (weather_res.forecasts[0].temperature.max) {
+//                    max_temperature = weather_res.forecasts[0].temperature.max.celsius;
+//                    min_temperature = weather_res.forecasts[0].temperature.min.celsius;
+//                    msg += "\n";
+//                    msg += "最高気温は" + max_temperature + "度で";
+//                    msg += "最低気温は" + min_temperature + "度です";
+//                }
+//            })
+//            console.log(msg);
+//            //return msg;
+//        })
+//    );
+//}
