@@ -1,7 +1,9 @@
 // -----------------------------------------------------------------------------
 // モジュールのインポート
+const http   = require("http");
 const server = require("express")();
 const line = require("@line/bot-sdk"); // Messaging APIのSDKをインポート
+
 
 // -----------------------------------------------------------------------------
 // パラメータ設定
@@ -10,13 +12,14 @@ const line_config = {
     channelSecret: process.env.LINE_CHANNEL_SECRET // 環境変数からChannel Secretをセットしています
 };
 
+const url = 'http://weather.livedoor.com/forecast/webservice/json/v1?city=130010';
+
 // -----------------------------------------------------------------------------
 // Webサーバー設定
 server.listen(process.env.PORT || 3000);
 
 // APIコールのためのクライアントインスタンスを作成
 const bot = new line.Client(line_config);
-
 
 // -----------------------------------------------------------------------------
 // ルーター設定
@@ -33,10 +36,36 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
         if (event.type == "message" && event.message.type == "text"){
             // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。
             if (event.message.text == "hello"){
+                // http request
+                var msg = '';
+                http.get(url, (res) => {
+                    var body = '';
+                    res.setEncoding('utf8');
+                    res.on('data', (chunk) => {
+                        body += chunk
+                    });
+                    res.on('end', (res) => {
+                        res = JSON.parse(body);
+                        var city = res.location.city;
+                        var date = res.forecasts[0].dateLabel;
+                        var weather = res.forecasts[0].telop
+                        msg = city + "の" + date + 'のお天気は' + weather + 'です';
+
+                        // 気温もわかる場合
+                        if (res.forecasts[0].temperature.max) {
+                            max_temperature = res.forecasts[0].temperature.max.celsius;
+                            min_temperature = res.forecasts[0].temperature.min.celsius;
+                            msg += "\n";
+                            msg += "最高気温は" + max_temperature + "度で";
+                            msg += "最低気温は" + min_temperature + "度です";
+                        }
+                    });
+                });
+
                 // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                 events_processed.push(bot.replyMessage(event.replyToken, {
                     type: "text",
-                    text: "hello!"
+                    text: msg
                 }));
             }
         }
