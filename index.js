@@ -29,18 +29,16 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
 
     // すべてのイベント処理のプロミスを格納する配列。
     let events_processed = [];
+    var msg = '';
 
     // イベントオブジェクトを順次処理。
     req.body.events.forEach((event) => {
         // この処理の対象をイベントタイプがメッセージで、かつ、テキストタイプだった場合に限定。
         if (event.type == "message" && event.message.type == "text"){
-            console.log("hit");
             // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。
             if (event.message.text == "hello"){
-                console.log("in");
                 // http request
-                var msg = '';
-                http.get(url, (weather_res) => {
+                events_processed.push(http.get(url, (weather_res) => {
                     console.log("request");
                     var body = '';
                     weather_res.setEncoding('utf8');
@@ -62,15 +60,16 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                             msg += "最高気温は" + max_temperature + "度で";
                             msg += "最低気温は" + min_temperature + "度です";
                         }
-                    });
-                    console.log(msg);
-                    // replyMessage()で返信し、そのプロミスをevents_processedに追加。
-                    events_processed.push(bot.replyMessage(event.replyToken, {
-                      type: "text",
-                      text: msg
-                    }));
-                });
 
+                        console.log(msg);
+                    })
+                }));
+
+               // replyMessage()で返信し、そのプロミスをevents_processedに追加。
+              events_processed.push(bot.replyMessage(event.replyToken, {
+                type: "text",
+                text: msg
+              }));
             }
         }
     });
