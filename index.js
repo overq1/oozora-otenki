@@ -60,7 +60,7 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                             msg += "最低気温は" + min_temperature + "度です";
                         }
                     });
-
+                    console.log(msg);
                     // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                     events_processed.push(bot.replyMessage(event.replyToken, {
                      type: "text",
