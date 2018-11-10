@@ -40,24 +40,24 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                 console.log("in");
                 // http request
                 var msg = '';
-                http.get(url, (res) => {
+                http.get(url, (weather_res) => {
                     console.log("request");
                     var body = '';
-                    res.setEncoding('utf8');
-                    res.on('data', (chunk) => {
+                    weather_res.setEncoding('utf8');
+                    weather_res.on('data', (chunk) => {
                         body += chunk
                     });
-                    res.on('end', (res) => {
-                        res = JSON.parse(body);
-                        var city = res.location.city;
-                        var date = res.forecasts[0].dateLabel;
-                        var weather = res.forecasts[0].telop
+                    weather_res.on('end', (weather_res) => {
+                        weather_res = JSON.parse(body);
+                        var city = weather_res.location.city;
+                        var date = weather_res.forecasts[0].dateLabel;
+                        var weather = weather_res.forecasts[0].telop
                         msg = city + "の" + date + 'のお天気は' + weather + 'です';
 
                         // 気温もわかる場合
-                        if (res.forecasts[0].temperature.max) {
-                            max_temperature = res.forecasts[0].temperature.max.celsius;
-                            min_temperature = res.forecasts[0].temperature.min.celsius;
+                        if (weather_res.forecasts[0].temperature.max) {
+                            max_temperature = weather_res.forecasts[0].temperature.max.celsius;
+                            min_temperature = weather_res.forecasts[0].temperature.min.celsius;
                             msg += "\n";
                             msg += "最高気温は" + max_temperature + "度で";
                             msg += "最低気温は" + min_temperature + "度です";
@@ -66,7 +66,7 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                     console.log(msg);
                     // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                     events_processed.push(bot.replyMessage(event.replyToken, {
-                     type: "text",
+                      type: "text",
                       text: msg
                     }));
                 });
