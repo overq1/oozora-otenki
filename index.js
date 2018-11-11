@@ -43,6 +43,11 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                        text: msg,
                    })
                });
+            } else if (event.message.text == "help") {
+                bot.replyMessage(event.replyToken, {
+                    type: "text",
+                    text: "今日のお空はどんな空？大空お天気の時間です！\n「天気」って私に言ってくれれば今日のお天気をお伝えしますよ"
+                });
             }
         }
     });
